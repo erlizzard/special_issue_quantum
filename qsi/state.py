@@ -140,7 +140,18 @@ class State:
         self.state = self.state.reshape(np.prod(dims), np.prod(dims))
 
     @Enforcer
-    def apply_kraus_operators(self, operators:list,
+    def apply_kraus_operators(self, operators:list, operation_spaces:list):
+        '''Allows for multiple kraus operators to be applied from one response. the operators must be supplied in the desired operation order. '''
+        more_than_one_op = any(isinstance(el, list) for el in operation_spaces)      #if is a list of a list, then repeat application 
+        
+        if more_than_one_op:
+            for i in range(len(operation_spaces)):
+                self._apply_kraus_operators(operators[i],operation_spaces[i])
+        else: 
+            self._apply_kraus_operators(operators,operation_spaces)                 #else pass on. For backward compatibility
+
+    
+    def _apply_kraus_operators(self, operators:list,
                               operation_spaces:list[StateProp]):
         """
         Applies a set of Kraus operators to a specified subspace of the system's state.
